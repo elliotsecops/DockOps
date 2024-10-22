@@ -19,7 +19,7 @@ This Go script checks for updates to your local Docker images by comparing their
 
 1. Ensure you have Go installed.
 2. Clone the repository: `git clone https://github.com/elliotsecops/DockOps`
-3. Navigate to the project directory: `cd docker-image-checker`
+3. Navigate to the project directory: `cd dockops`
 4. Install dependencies: `go mod tidy`
 5. Build the executable: `go build -o dockops`
 
