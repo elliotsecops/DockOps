@@ -1,70 +1,106 @@
-# Dockops, a Docker Image Update Checker
+# DockOps: Docker Image Update Checker and Minimalist CLI
 
-This Go script checks for updates to your local Docker images by comparing their tags against the latest tags available in remote registries. It supports Docker Hub, Google Container Registry (GCR), and other registries, using a configurable authentication mechanism and robust error handling.
+DockOps is a suite of Go tools to simplify Docker management:
 
-## Features
+1. **`dockupdater`:** Checks local Docker images for updates against remote registries.
+2. **`dockops`:** A minimalist CLI for common Docker operations using the Docker Engine (Moby) API.
 
-* **Supports Multiple Registries:** Checks for updates on Docker Hub, GCR, and other registries (you can add more!).
-* **Semantic Versioning:** Uses semantic versioning (SemVer) for accurate version comparison.
-* **Configurable Authentication:** Supports authentication using environment variables or a configuration file (YAML).
-* **Rate Limiting:** Prevents overloading remote registries by limiting the rate of requests.
-* **Retry Mechanism:** Includes retry logic with exponential backoff for transient network errors.
-* **JSON Output:** Provides output in JSON format for easy parsing by other scripts or tools.
-* **Robust Error Handling:** Provides informative error messages for improved debugging.
-* **Concurrency:** Processes images concurrently to improve performance.
-* **Local Cache:** Caches remote tag information to reduce the number of API requests.
+## Table of Contents  <!-- Optional, but good practice for longer READMEs -->
 
+- [Dockupdater](#dockupdater)
+  - [Features](#dockupdater-features)
+  - [Installation](#dockupdater-installation)
+  - [Configuration](#dockupdater-configuration)
+  - [Usage](#dockupdater-usage)
+  - [Example Output](#dockupdater-example-output)
+- [Dockops](#dockops)
+  - [Features](#dockops-features)
+  - [Installation](#dockops-installation)
+  - [Usage](#dockops-usage)
+- [Contributing](#contributing)
+- [License](#license)
 
-## Installation
+## Dockupdater: Image Update Checker
 
-1. Ensure you have Go installed.
-2. Clone the repository: `git clone https://github.com/elliotsecops/DockOps`
-3. Navigate to the project directory: `cd dockops`
-4. Install dependencies: `go mod tidy`
-5. Build the executable: `go build -o dockops`
+`dockupdater` efficiently checks your local Docker images for updates by comparing their tags against the latest available in remote registries (Docker Hub, GCR, etc.). It features configurable authentication, rate limiting, and retry mechanisms for robustness.
 
+### Features
 
-## Configuration
+<!-- List in alphabetical order for easier scanning -->
+- **Configurable Authentication:** Environment variables or `config.yaml`.
+- **Concurrency:** Fast processing of multiple images.
+- **JSON Output:** Easy parsing for scripts and tools. *(Planned)*
+- **Local Cache:** Reduces API requests.
+- **Multi-Registry Support:** Docker Hub, GCR, and more.
+- **Rate Limiting:** Avoids overloading registries.
+- **Retry Mechanism:** Handles transient network errors.
+- **Robust Error Handling:** Informative error messages.
+- **Semantic Versioning:** Accurate version comparison using SemVer.
 
-Create a `config.yaml` file in the same directory as the executable. Here's an example:
+### Installation
+
+1. **Go:** Ensure Go is installed.
+2. **Clone:** `git clone https://github.com/elliotsecops/DockOps`
+3. **Navigate:** `cd DockOps`
+4. **Dependencies:** `go mod tidy`
+5. **Build:** `go build -o dockupdater ./cmd/updater`
+
+### Configuration
+
+Create `config.yaml` in the project root:
 
 ```yaml
-gcr_access_token: "YOUR_GCR_ACCESS_TOKEN" # Required for GCR images. Get this from Google Cloud Console.
-rate_limit: 1s                         # Rate limit (e.g., 1s, 100ms). Defaults to 100ms if not set.
-max_retries: 3                         # Maximum number of retries for network errors. Defaults to 3 if not set.
-retry_delay: 1s                        # Delay between retries (e.g., 1s, 200ms). Defaults to 1s if not set.
-output_format: "text"                  # Output format ("text" or "json"). Defaults to "text" if not set.
+gcr_access_token: "YOUR_GCR_ACCESS_TOKEN"
+# ... other options (rate_limit, max_retries, retry_delay, output_format)
 ```
 
-You can also set these configuration options via environment variables (e.g., `GCR_ACCESS_TOKEN`, `RATE_LIMIT`, `MAX_RETRIES`, `RETRY_DELAY`, `OUTPUT_FORMAT`). Environment variables override the values in `config.yaml`.
+### Usage
 
-## Usage
-
-Run the executable: `./dockops`
-
-The script will output the update status for each image, indicating whether it's up-to-date or requires an update.
-
-**Example Output (Text Format):**  (This example shows images from your Docker Hub account)
-
-```
-Image elliotsecops/my-image:latest is up-to-date.
-Image elliotsecops/another-image:v1.0.0 is outdated. Latest version is v1.0.1.
-Image library/ubuntu:latest is outdated. Latest version is 22.04.
-Error checking gcr.io/my-project/my-image:v1.2.3: error getting remote tags: ...
+```bash
+./dockupdater
 ```
 
-**Example Output (JSON Format):**
+### Example Output
 
-```json
-{"update":"Image elliotsecops/my-image:latest is up-to-date."}
-{"update":"Image elliotsecops/another-image:v1.0.0 is outdated. Latest version is v1.0.1."}
-{"update":"Error checking gcr.io/my-project/my-image:v1.2.3: error getting remote tags: ..."}
+```
+Update available for elliotsecops/my-image: 1.0.0 -> 1.0.1
+// ...
+```
+
+## Dockops: Minimalist Docker CLI
+
+`dockops` provides a streamlined CLI for essential Docker operations.
+
+### Features
+
+- **`list`:** List Docker images.
+- **`logs`:** View container logs (`-f` to follow).
+- **`remove`:** Remove Docker images.
+- **`start`:** Start containers with port mapping (`-p`), volumes (`-v`), and custom commands (`-c`).
+- **`stop`:** Stop running containers.
+
+### Installation
+
+1. **Go:** Ensure Go is installed.
+2. **Clone:** `git clone https://github.com/elliotsecops/DockOps`
+3. **Navigate:** `cd DockOps`
+4. **Dependencies:** `go mod tidy`
+5. **Build:** `go build -o dockops ./cmd/dockops`
+
+### Usage
+
+```bash
+./dockops start <image_name> [-p <host_port>:<container_port>] [-v <host_path>:<container_path>] [-c "<command>"]
+./dockops stop <container_id>
+./dockops logs <container_id> [-f]  # Follow logs
+./dockops remove <image_id>
+./dockops list
 ```
 
 ## Contributing
 
-Contributions are welcome! Please open issues or submit pull requests.
+Contributions are welcome! See [CONTRIBUTING.md](CONTRIBUTING.md).
 
 ## License
 
-MIT
+MIT License - see [LICENSE](LICENSE).
